@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\userController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
-
+use App\Http\Controllers\ProfileController;
 // Route::get('/', function () {
 //     return view('pages.dashboard');
 // });
@@ -21,6 +21,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('product',ProductController::class);
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+});
 
 //register
 // Route::get('register', function () {

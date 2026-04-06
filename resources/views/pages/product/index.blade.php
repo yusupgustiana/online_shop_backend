@@ -59,7 +59,7 @@
                                 <tr>
                                     <td>
                                         <img
-                                            src="{{ asset($product->image) }}"
+                                            src="{{ asset($product->image_url) }}"
                                             alt="{{ $product->name }}"
                                             width="50"
                                             height="50"
@@ -73,7 +73,7 @@
                                     <td>{{ $product->category->name }}</td>
                                     <td>{{ $product->price }}</td>
                                     <td>{{ $product->stock }}</td>
-                                    <td>{{ $product->created_at->format('d M Y') }}</td>
+                                    <td>{{ $product->created_at?->format('d M Y') }}</td>
 
                                     <td>
                                         <div class="d-flex justify-content-center">

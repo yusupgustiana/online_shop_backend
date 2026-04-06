@@ -34,5 +34,14 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+        'rajaongkir' => [
+        'key' => env('RAJAONGKIR_API_KEY'),
+        'delivery_key' => env('RAJAONGKIR_DELIVERY_KEY'),
+    ],
+
+'midtrans' => [
+    'server_key' => env('MIDTRANS_SERVER_KEY'),
+    'client_key' => env('MIDTRANS_CLIENT_KEY'),
+],
 
 ];

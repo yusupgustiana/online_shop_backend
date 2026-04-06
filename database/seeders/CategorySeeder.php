@@ -1,35 +1,34 @@
 <?php
 
 namespace Database\Seeders;
-
 use Illuminate\Database\Seeder;
 use App\Models\Category;
 
 class CategorySeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
         Category::insert([
             [
-                'name' => 'Electronics',
-                'description' => 'Electronic devices and accessories',
-                'image' => 'categories/electronics.png',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'name' => 'Best Seller',
+        
+                'description' => 'Produk terlaris',
+                'image' => 'menu-bestseller.png',
             ],
             [
-                'name' => 'Fashion',
-                'description' => 'Clothing and fashion products',
-                'image' => 'categories/fashion.png',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'name' => 'Flash Sale',
+                'description' => 'Promo terbatas',
+                'image' => 'menu-flashsale.png',
             ],
             [
-                'name' => 'Books',
-                'description' => 'Books and learning materials',
-                'image' => 'categories/books.png',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'name' => 'Top Rated',
+                'description' => 'Rating tertinggi',
+                'image' => 'menu-toprated.png',
+            ],
+            [
+                'name' => 'More',
+                'description' => 'Kategori lainnya',
+                'image' => 'menu-more.png',
             ],
         ]);
     }
