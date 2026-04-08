@@ -12,7 +12,7 @@
         <div class="section-header">
             <h1>Product</h1>
             <div class="section-header-button">
-                <a href="{{ route('product.create') }}" class="btn btn-primary">Add New</a>
+                <a href="{{ route('admin.product.create') }}" class="btn btn-primary">Add New</a>
             </div>
         </div>
 
@@ -25,7 +25,7 @@
                 <div class="card-body">
                     <!-- Search -->
                     <div class="float-right mb-3">
-                        <form method="GET" action="{{ route('product.index') }}">
+                        <form method="GET" action="{{ route('admin.product.index') }}">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="Search" name="search">
                                 <div class="input-group-append">
@@ -77,12 +77,12 @@
 
                                     <td>
                                         <div class="d-flex justify-content-center">
-                                            <a href="{{ route('product.edit', $product->id) }}"
+                                            <a href="{{ route('pages.product.edit', $product->id) }}"
                                                class="btn btn-sm btn-primary mr-1">
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            <form action="{{ route('product.destroy', $product->id) }}"
+                                            <form action="{{ route('admin.product.destroy', $product->id) }}"
                                                   method="POST"
                                                   onsubmit="return confirm('Are you sure?')">
                                                 @csrf

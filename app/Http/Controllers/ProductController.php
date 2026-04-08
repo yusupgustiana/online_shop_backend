@@ -32,7 +32,7 @@ class ProductController extends Controller
             $data['image'] = 'uploads/products/' . $filename;
         }
         Product::create($data);
-        return redirect()->route('product.index')->with('success', 'Product created successfully');
+        return redirect()->route('admin.product.index')->with('success', 'Product created successfully');
     }
         public function edit(Product $product)
     {
@@ -66,7 +66,7 @@ class ProductController extends Controller
 
     $product->update($data);
 
-    return redirect()->route('product.index')
+    return redirect()->route('admin.product.index')
         ->with('success', 'Product updated successfully');
 }
 }

@@ -8,15 +8,14 @@ use App\Models\Product;
 
 class HomeController extends Controller
 {
-    public function index()
-    {
-        // Ambil semua kategori
-        $categories = Category::all();
+public function index()
+{
+    $role = strtoupper(auth()->user()->roles);
 
-        // Ambil beberapa produk featured (misal 10 produk terbaru)
-        $products = Product::latest()->take(10)->get();
-
-        // Kirim ke view
-        return view('home', compact('categories', 'products'));
+    if ($role === 'ADMIN') {
+        return redirect()->route('admin.dashboard');
     }
+
+    return redirect()->route('user.dashboard');
+}
 }

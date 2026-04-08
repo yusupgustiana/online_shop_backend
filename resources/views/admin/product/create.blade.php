@@ -113,7 +113,7 @@
                         <button class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Product
                         </button>
-                        <a href="{{ route('product.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.product.index') }}" class="btn btn-secondary">
                             Cancel
                         </a>
                     </div>

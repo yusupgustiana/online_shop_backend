@@ -14,14 +14,14 @@
             <h1>Edit Category</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="#">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="{{ route('category.index') }}tyuyyy">Category</a></div>
+                <div class="breadcrumb-item"><a href="{{ route('admin.category.index') }}tyuyyy">Category</a></div>
                 <div class="breadcrumb-item">Edit</div>
             </div>
         </div>
 
         <div class="section-body">
             <div class="card">
-                <form action="{{ route('category.update', $category->id) }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.category.update', $category->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -79,7 +79,7 @@
 
                     <div class="card-footer text-right">
                         <button class="btn btn-primary">Update</button>
-                        <a href="{{ route('category.index') }}" class="btn btn-secondary">Cancel</a>
+                        <a href="{{ route('admin.category.index') }}" class="btn btn-secondary">Cancel</a>
                     </div>
 
                 </form>

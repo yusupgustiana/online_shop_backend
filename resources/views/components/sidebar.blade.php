@@ -15,18 +15,18 @@
     </li>
 
     <li class="nav-item {{ Request::is('user*') ? 'active' : '' }}">
-        <a href="{{ route('user.index') }}" class="nav-link">
+        <a href="{{ route('admin.user.index') }}" class="nav-link">
             <i class="fas fa-users"></i><span>Users</span>
         </a>
     </li>
 
     <li class="nav-item {{ Request::is('category*') ? 'active' : '' }}">
-        <a href="{{ route('category.index') }}" class="nav-link">
+        <a href="{{ route('admin.category.index') }}" class="nav-link">
             <i class="fas fa-tags"></i><span>Category</span>
         </a>
     </li>
         <li class="nav-item {{ Request::is('product*') ? 'active' : '' }}">
-        <a href="{{ route('product.index') }}" class="nav-link">
+        <a href="{{ route('admin.product.index') }}" class="nav-link">
             <i class="fas fa-tags"></i><span>Product</span>
         </a>
     </li>
