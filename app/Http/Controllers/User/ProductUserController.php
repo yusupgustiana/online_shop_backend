@@ -1,20 +1,28 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 
-class ProductController extends Controller
+
+class ProductUserController extends Controller
 {
     //index
     public function index()
     {
         $products = Product::with('category')->paginate(10);
-        return view('pages.product.index', compact('products'));
+        return view('user.home.dashboard', compact('products'));
     }
-
+  
+    //show
+    public function show($id)
+{
+    $product = \App\Models\Product::findOrFail($id);
+    return view('user.product.detail', compact('product'));
+}
     //create
     public function create()
     {

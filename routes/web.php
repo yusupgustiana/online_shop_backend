@@ -7,7 +7,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Admin\CategoryAdminController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\HomeUserController;
+use App\Http\Controllers\User\CartUserController;
+use App\Http\Controllers\User\ProductUserController;
+use App\Http\Controllers\RedirectController;
 use App\Http\Controllers\User\CategoryUserController;
+
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -79,8 +88,14 @@ Route::prefix('user')
     ->name('user.')
     ->group(function () {
 
-        Route::get('/dashboard', [CategoryUserController::class, 'index'])
+        Route::get('/dashboard', [HomeUserController::class, 'index'])
             ->name('dashboard');
+        Route::post('/cart/add', [CartUserController::class, 'add'])->name('cart.add');
+        Route::get('/cart', [CartUserController::class, 'index'])->name('cart.index');
+        Route::post('/cart/update/{id}', [CartUserController::class, 'update'])->name('cart.update');
+        Route::delete('/cart/remove/{id}', [CartUserController::class, 'remove'])->name('cart.remove');
+        Route::get('/product/{id}', [ProductUserController::class, 'show'])->name('product.show');
+ 
     });
 
 
@@ -99,7 +114,15 @@ Route::middleware('auth')->group(function () {
         ->name('profile.update');
 });
 
+/*
+|--------------------------------------------------------------------------
+| CART ROUTES (USER ONLY)
+|--------------------------------------------------------------------------
+*/
 
+Route::get('/cart', [CartUserController::class, 'index'])->name('cart.index');
+Route::post('/cart/update/{id}', [CartUserController::class, 'update'])->name('cart.update');
+Route::delete('/cart/remove/{id}', [CartUserController::class, 'remove'])->name('cart.remove');
 /*
 |--------------------------------------------------------------------------
 | DEBUG (OPSIONAL)

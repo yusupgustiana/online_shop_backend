@@ -4,7 +4,7 @@
 <div class="container">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center py-3">
-        <h4>Cwb Store</h4>
+        <h4>Y.G Store</h4>
         <div>
             <i class="bi bi-bell"></i>
             <i class="bi bi-cart"></i>
