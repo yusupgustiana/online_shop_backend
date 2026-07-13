@@ -1,6 +1,10 @@
 <div class="flex justify-between items-center px-6 py-4 bg-white shadow">
 
-    <h2 class="text-xl font-bold text-emerald-500">Y.G Store</h2>
+<a href="/">
+    <img src="{{ asset('img/logo1.png') }}" 
+         alt="Jualin Logo"
+         class="h-14 md:h-16 object-contain">
+</a>
 
     <!-- SEARCH -->
     <div class="w-1/3">
@@ -32,24 +36,30 @@
 
     <!-- ICON -->
     <button class="cursor-pointer">👤</button>
+    
+<!-- DROPDOWN -->
+<div x-show="open"
+     x-transition
+     class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow z-50">
 
-    <!-- DROPDOWN -->
-    <div x-show="open"
-         x-transition
-         class="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow z-50">
+    <a href="#" class="block px-4 py-2 hover:bg-gray-100">
+        Profile
+    </a>
 
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100">
-            Profile
-        </a>
+    <!-- ✅ LIST ADDRESS -->
+    <a href="{{ route('address.index') }}"
+       class="block px-4 py-2 hover:bg-gray-100">
+        Alamat Saya
+    </a>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
-                Logout
-            </button>
-        </form>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button class="w-full text-left px-4 py-2 hover:bg-gray-100">
+            Logout
+        </button>
+    </form>
 
-    </div>
+</div>
 </div>
 
     </div>

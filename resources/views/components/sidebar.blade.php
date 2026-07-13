@@ -8,11 +8,11 @@
         </div>
 <ul class="sidebar-menu">
 
-    <li class="nav-item {{ Request::is('dashboard-ecommerce-dashboard') ? 'active' : '' }}">
-        <a href="{{ url('dashboard-ecommerce-dashboard') }}" class="nav-link">
-            <i class="fas fa-fire"></i><span>Dashboard</span>
-        </a>
-    </li>
+<li class="nav-item {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
+    <a href="{{ route('admin.dashboard') }}" class="nav-link">
+        <i class="fas fa-fire"></i><span>Dashboard</span>
+    </a>
+</li>
 
     <li class="nav-item {{ Request::is('user*') ? 'active' : '' }}">
         <a href="{{ route('admin.user.index') }}" class="nav-link">
@@ -30,6 +30,11 @@
             <i class="fas fa-tags"></i><span>Product</span>
         </a>
     </li>
+
+           <li class="nav-item {{ Request::is('banners*') ? 'active' : '' }}">
+        <a href="{{ route('admin.banners.index') }}" class="nav-link">
+            <i class="fas fa-image"></i><span>Banner</span>
+        </a>
 
 </ul>
  </aside>

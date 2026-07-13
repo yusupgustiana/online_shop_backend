@@ -10,47 +10,47 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductControllerApi extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Product::with('category');
+ public function index(Request $request)
+{
+    $products = Product::query()
+        ->join('categories', 'products.category_id', '=', 'categories.id')
+        ->select(
+            'products.*',
+            'categories.name as category_name'
+        )
+        ->when($request->filled('search'), function ($query) use ($request) {
+            $query->where('products.name', 'like', '%' . $request->search . '%');
+        })
+        ->when($request->filled('category_id'), function ($query) use ($request) {
+            $query->where('products.category_id', $request->category_id);
+        })
+        ->where('products.is_available', true)
+        ->orderBy('products.name')
+        ->paginate($request->integer('per_page', 10));
 
-        // search
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('name', 'LIKE', "%{$search}%");
-        }
+    return response()->json([
+        'success' => true,
+        'message' => 'Success',
+        'data' => $products,
+    ]);
+}
+   public function show($id)
+{
+    $product = Product::with('category')->find($id);
 
-        // filter category
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        // only available product
-        $query->where('is_available', 1)
-              ->orderBy('name', 'asc');
-
-        $products = $query->paginate($request->get('per_page', 10));
-
+    if (!$product) {
         return response()->json([
-            'message' => 'Success',
-            'data' => $products
-        ]);
+            'success' => false,
+            'message' => 'Product not found',
+            'data' => null,
+        ], 404);
     }
 
-    public function show($id)
-    {
-        $product = Product::with('category')->find($id);
-
-        if (!$product) {
-            return response()->json([
-                'message' => 'Product not found',
-                'data' => null,
-            ], 404);
-        }
-
-        return response()->json([
-            'message' => 'Success',
-            'data' => $product
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'Success',
+        'data' => $product,
+    ]);
+}
+    
 }

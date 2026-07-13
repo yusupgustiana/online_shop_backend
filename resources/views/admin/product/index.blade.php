@@ -12,7 +12,7 @@
         <div class="section-header">
             <h1>Product</h1>
             <div class="section-header-button">
-                <a href="{{ route('admin.product.create') }}" class="btn btn-primary">Add New</a>
+                <a href="{{ route('admin.banners.create') }}" class="btn btn-primary">Add New</a>
             </div>
         </div>
 
@@ -77,13 +77,13 @@
 
                                     <td>
                                         <div class="d-flex justify-content-center">
-                                            <a href="{{ route('pages.product.edit', $product->id) }}"
+                                            <a href="{{ route('admin.product.edit', $product->id) }}"
                                                class="btn btn-sm btn-primary mr-1">
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            <form action="{{ route('admin.product.destroy', $product->id) }}"
-                                                  method="POST"
+                                          <form action="{{ route('admin.product.destroy', $product->id) }}" method="POST"
+                                              
                                                   onsubmit="return confirm('Are you sure?')">
                                                 @csrf
                                                 @method('DELETE')

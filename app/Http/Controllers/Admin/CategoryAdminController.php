@@ -19,7 +19,7 @@ class CategoryAdminController extends Controller
     // CREATE
     public function create()
     {
-        return view('pages.category.create');
+        return view('admin.category.create');
     }
 
     // STORE
@@ -33,7 +33,7 @@ class CategoryAdminController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time().'_'.$file->getClientOriginalName();
+            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $file->move(public_path('categories'), $filename);
             $data['image'] = 'categories/'.$filename;
         }
@@ -68,7 +68,7 @@ class CategoryAdminController extends Controller
             }
 
             $file = $request->file('image');
-            $filename = time().'_'.$file->getClientOriginalName();
+           $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
             $file->move(public_path('categories'), $filename);
             $data['image'] = 'categories/'.$filename;
         }

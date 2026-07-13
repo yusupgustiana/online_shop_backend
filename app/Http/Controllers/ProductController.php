@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage; 
 
 class ProductController extends Controller
 {
@@ -12,15 +13,17 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with('category')->paginate(10);
-        return view('pages.product.index', compact('products'));
+        return view('admin.product.index', compact('products'));
     }
 
     //create
     public function create()
     {
         $categories = Category::all();
-        return view('pages.product.create', compact('categories'));
+        return view('admin.product.create', compact('categories'));
     }
+
+
     //store image
     public function store(Request $request)
     {
@@ -37,8 +40,10 @@ class ProductController extends Controller
         public function edit(Product $product)
     {
         $categories = Category::all();
-        return view('pages.product.edit', compact('product', 'categories'));
+        return view('admin.product.edit', compact('product', 'categories'));
     }
+
+
     public function update(Request $request, Product $product)
 
     {
@@ -71,4 +76,16 @@ class ProductController extends Controller
         ->with('success', 'Product updated successfully');
 
         }
+public function destroy(Product $product)
+{
+    if ($product->image) {
+        Storage::disk('public')->delete($product->image);
+    }
+
+    $product->delete();
+
+    return redirect()
+        ->route('admin.product.index')
+        ->with('success', 'Product deleted successfully');
+}
 }

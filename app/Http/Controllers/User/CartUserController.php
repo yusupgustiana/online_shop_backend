@@ -45,22 +45,24 @@ public function add(Request $request)
 }
 
     // ➖ UPDATE QTY
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'quantity' => 'required|integer|min:1'
-        ]);
+public function update(Request $request, $id)
+{
+    $quantity = (int) $request->quantity;
 
-        $cart = Cart::where('user_id', auth()->id())
-            ->where('product_id', $id)
-            ->firstOrFail();
-
-        $cart->update([
-            'quantity' => $request->quantity
-        ]);
-
-        return redirect()->back();
+    if ($quantity < 1) {
+        $quantity = 1;
     }
+
+    $cart = Cart::where('user_id', auth()->id())
+        ->where('product_id', $id)
+        ->firstOrFail();
+
+    $cart->update([
+        'quantity' => $quantity
+    ]);
+
+    return redirect()->back();
+}
 
     // ❌ HAPUS ITEM
     public function remove($id)

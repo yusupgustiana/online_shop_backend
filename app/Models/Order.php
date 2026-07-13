@@ -19,6 +19,10 @@ class Order extends Model
         'payment_va_name',
         'payment_va_number'
     ];
+        protected $casts = [
+        'created_at' => 'datetime:Y-m-d\TH:i:s.v\Z',
+        'updated_at' => 'datetime:Y-m-d\TH:i:s.v\Z',
+    ];
 
     /**
      * Relasi ke user

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 
+
+
 class CategoryControllerApi extends Controller
 {
     // GET /api/categories
@@ -20,4 +22,5 @@ class CategoryControllerApi extends Controller
             'data' => $categories
         ]);
     }
+   
 }

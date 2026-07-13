@@ -1,57 +1,38 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'App')</title>
+    <title>@yield('title', 'Jualin')</title>
 
     <!-- GOOGLE FONT -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+ <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- SWIPER CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
     <!-- TAILWIND -->
-    @vite('resources/css/app.css')
+
+@vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- GLOBAL STYLE -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         body {
+            font-family: 'Poppins', sans-serif;
             background: #f5f7f9;
             color: #333;
         }
 
-        a {
-            text-decoration: none;
-        }
-
-        /* MAIN WRAPPER */
         .app-wrapper {
-            width: 100%;
             min-height: 100vh;
-        }
-
-        /* NAVBAR (optional future use) */
-        .navbar {
-            height: 60px;
-            background: white;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            flex-direction: column;
         }
 
-        /* CONTENT */
         .content {
-            padding: 0;
+            flex: 1;
         }
 
-        /* FOOTER */
         .footer {
             text-align: center;
             padding: 15px;
@@ -62,17 +43,10 @@
 
     @stack('styles')
 </head>
+
 <body>
 
 <div class="app-wrapper">
-
-    <!-- OPTIONAL NAVBAR -->
-    {{-- 
-    <div class="navbar">
-        <div>Logo</div>
-        <div>Menu</div>
-    </div>
-    --}}
 
     <!-- CONTENT -->
     <div class="content">
@@ -81,12 +55,21 @@
 
     <!-- FOOTER -->
     <div class="footer">
-        © {{ date('Y') }} Y.G Store
+        © {{ date('Y') }} Jualin
     </div>
 
 </div>
 
-@stack('scripts')
+<!-- ================= JS ================= -->
+
+<!-- ALPINE -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- SWIPER JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+@stack('scripts')
+
 </body>
 </html>
+

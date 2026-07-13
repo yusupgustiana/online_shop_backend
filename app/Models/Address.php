@@ -14,31 +14,25 @@ class Address extends Model
         'name',
         'full_address',
         'prov_id',
+        'prov_name',
         'city_id',
+        'city_name',
         'district_id',
+        'district_name',
         'postal_code',
         'phone',
         'is_default',
     ];
 
-        public function province()
-    {
-        return $this->belongsTo(Province::class, 'prov_id');
-    }
-
-    public function city()
-    {
-        return $this->belongsTo(City::class, 'city_id');
-    }
-
-    public function district()
-    {
-        return $this->belongsTo(District::class, 'district_id');
-    }
-     public function getFullAddressCompleteAttribute()
-    {
-        return "{$this->full_address}, {$this->district->name}, {$this->city->name}, {$this->province->name}";
-    }
+public function getFullAddressCompleteAttribute()
+{
+    return collect([
+        $this->full_address,
+        $this->district_name,
+        $this->city_name,
+        $this->prov_name,
+    ])->filter()->implode(', ');
+}
 
 
 }
