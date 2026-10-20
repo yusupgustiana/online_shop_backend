@@ -78,8 +78,8 @@ class ProductController extends Controller
         }
 public function destroy(Product $product)
 {
-    if ($product->image) {
-        Storage::disk('public')->delete($product->image);
+    if ($product->image && file_exists(public_path($product->image))) {
+        unlink(public_path($product->image));
     }
 
     $product->delete();

@@ -19,7 +19,7 @@
         <span>🔔</span>
 
         <!-- CART -->
-        <a href="{{ route('cart.index') }}" class="relative">
+        <a href="{{ route('user.cart.index') }}" class="relative">
             🛒
             @if($cartCount > 0)
                 <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">

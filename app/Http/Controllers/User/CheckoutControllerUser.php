@@ -28,8 +28,7 @@ class CheckoutControllerUser extends Controller
 
         $total = $cart->sum(fn($item) => $item->product->price * $item->quantity);
 
-        $addresses = Address::with(['province', 'city', 'district'])
-            ->where('user_id', auth()->id())
+        $addresses = Address::where('user_id', auth()->id())
             ->get();
 
         return view('user.checkout.index', compact(

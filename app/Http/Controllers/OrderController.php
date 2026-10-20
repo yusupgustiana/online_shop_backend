@@ -27,7 +27,7 @@ class OrderController extends Controller
             ->get();
 
         if ($cart->isEmpty()) {
-            return redirect()->route('cart.index')
+            return redirect()->route('user.cart.index')
                 ->with('error', 'Keranjang kosong');
         }
 

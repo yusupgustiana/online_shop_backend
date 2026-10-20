@@ -18,7 +18,7 @@ class HomeUserController extends Controller
             ->orderBy('position', 'asc')
             ->get();
 
-        return view('user.dashboard', compact(
+        return view('user.home.dashboard', compact(
             'products',
             'categories',
             'banners'

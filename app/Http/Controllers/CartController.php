@@ -15,7 +15,7 @@
 //             ->where('user_id', auth()->id())
 //             ->get();
 
-//         return view('pages.cart.index', compact('cart'));
+//         return view('pages.user.cart.index', compact('cart'));
 //     }
 
 //     // ➕ TAMBAH KE CART

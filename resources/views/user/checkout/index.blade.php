@@ -39,29 +39,63 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- ALAMAT -->
-                <div class="bg-white rounded-2xl shadow p-6">
-                    <h2 class="text-lg font-semibold mb-4">
-                        Alamat Pengiriman
-                    </h2>
 
-                    <select name="address_id"
-                            id="addressSelect"
-                            class="w-full border rounded-lg px-3 py-2"
-                            required>
+{{-- Alamat Pengiriman --}}
+<div class="bg-white rounded-2xl shadow p-6">
+    <div class="flex items-center justify-between gap-3 mb-4">
+        <h2 class="text-lg font-semibold">
+            Alamat Pengiriman
+        </h2>
 
-                        <option value="">Pilih alamat</option>
+        <a href="{{ route('address.create') }}"
+           class="inline-flex items-center gap-2 bg-emerald-500
+                  hover:bg-emerald-600 text-white text-sm font-medium
+                  px-4 py-2 rounded-lg transition">
 
-                        @foreach($addresses as $address)
-                            <option value="{{ $address->id }}"
-                                    data-district="{{ $address->district_id }}">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="w-4 h-4"
+                 fill="none"
+                 viewBox="0 0 24 24"
+                 stroke="currentColor"
+                 stroke-width="2">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 4v16m8-8H4" />
+            </svg>
 
-                                {{ $address->name }} - {{ $address->city_name }}
+            Tambah Alamat
+        </a>
+    </div>
 
-                            </option>
-                        @endforeach
+    <select name="address_id"
+            id="addressSelect"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            required>
 
-                    </select>
-                </div>
+        <option value="">Pilih alamat pengiriman</option>
+
+        @foreach ($addresses as $address)
+            <option value="{{ $address->id }}"
+                    data-district="{{ $address->district_id }}"
+                    @selected(old('address_id') == $address->id)>
+
+                {{ $address->name }} - {{ $address->city_name }}
+            </option>
+        @endforeach
+    </select>
+
+    @error('address_id')
+        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+    @enderror
+
+    @if ($addresses->isEmpty())
+        <p class="text-sm text-gray-500 mt-3">
+            Anda belum memiliki alamat. Silakan tambahkan alamat terlebih dahulu.
+        </p>
+    @endif
+</div>
+
 
                 <!-- ONGKIR -->
                 <div class="bg-white rounded-2xl shadow p-6">

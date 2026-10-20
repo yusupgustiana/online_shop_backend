@@ -217,10 +217,7 @@ Route::prefix('user')
     )
     ->name('cart.update');
 
-
-    Route::delete('/cart/remove/{id}',
-        [CartUserController::class,'remove']
-    )
+Route::delete('/cart/remove/{id}', [CartUserController::class, 'remove'])
     ->name('cart.remove');
 
 

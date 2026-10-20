@@ -13,57 +13,57 @@ class CategorySeeder extends Seeder
             [
                 'name' => 'Fashion',
                 'description' => 'Pakaian, sepatu, tas, dan aksesoris',
-                'image' => 'fashion.png',
+                'image' => 'categories/fashion.png',
             ],
             [
                 'name' => 'Elektronik',
                 'description' => 'Gadget, laptop, dan aksesoris elektronik',
-                'image' => 'electronics.png',
+                'image' => 'categories/electronics.png',
             ],
             [
                 'name' => 'Beauty & Skincare',
                 'description' => 'Perawatan wajah, tubuh, dan kecantikan',
-                'image' => 'beauty.png',
+                'image' => 'categories/beauty.png',
             ],
             [
                 'name' => 'Home & Living',
                 'description' => 'Peralatan dan dekorasi rumah',
-                'image' => 'home-living.png',
+                'image' => 'categories/home-living.png',
             ],
             [
                 'name' => 'Perlengkapan Bayi',
                 'description' => 'Kebutuhan ibu dan bayi',
-                'image' => 'baby.png',
+                'image' => 'categories/baby.png',
             ],
             [
                 'name' => 'Kesehatan',
                 'description' => 'Vitamin, suplemen, dan alat kesehatan',
-                'image' => 'health.png',
+                'image' => 'categories/health.png',
             ],
             [
                 'name' => 'Makanan & Minuman',
                 'description' => 'Makanan ringan, minuman, dan kebutuhan dapur',
-                'image' => 'food-drink.png',
+                'image' => 'categories/food-drink.png',
             ],
             [
                 'name' => 'Sport & Outdoor',
                 'description' => 'Perlengkapan olahraga dan aktivitas luar ruangan',
-                'image' => 'sport-outdoor.png',
+                'image' => 'categories/sport-outdoor.png',
             ],
             [
                 'name' => 'Otomotif',
                 'description' => 'Aksesoris dan kebutuhan kendaraan',
-                'image' => 'automotive.png',
+                'image' => 'categories/automotive.png',
             ],
             [
                 'name' => 'Mainan & Hobi',
                 'description' => 'Mainan anak, koleksi, dan hobi',
-                'image' => 'toys-hobby.png',
+                'image' => 'categories/toys-hobby.png',
             ],
             [
                 'name' => 'Buku & Alat Tulis',
                 'description' => 'Buku, alat tulis, dan perlengkapan sekolah',
-                'image' => 'books-stationery.png',
+                'image' => 'categories/books-stationery.png',
             ],
         ]);
     }

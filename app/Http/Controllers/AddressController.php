@@ -10,14 +10,17 @@ use App\Services\RajaOngkirService;
 class AddressController extends Controller
 {
     // 📍 LIST ALAMAT
-    public function index()
-    {
-        $addresses = Address::with(['province', 'city', 'district'])
-            ->where('user_id', auth()->id())
-            ->get();
 
-        return view('user.address.index', compact('addresses'));
-    }
+public function index()
+{
+    $addresses = Address::where('user_id', auth()->id())
+        ->orderByDesc('is_default')
+        ->latest()
+        ->get();
+
+    return view('user.address.index', compact('addresses'));
+}
+
 
     // ➕ FORM TAMBAH
 public function create(RajaOngkirService $rajaOngkir)
