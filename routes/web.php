@@ -55,7 +55,7 @@ Route::middleware('guest')->group(function () {
     )->name('register.process');
 
 });
-
+Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle']);
 
 
 /*
