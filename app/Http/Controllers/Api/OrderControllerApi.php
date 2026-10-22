@@ -45,23 +45,23 @@ class OrderControllerApi extends Controller
     }
 
     // ✅ HISTORY (SUDAH OK, SEDIKIT DIRAPIKAN)
-    public function history()
-    {
-        $orders = Order::with([
-            'orderItems.product',
-            'address.province',
-            'address.city',
-            'address.district'
-        ])
-        ->where('user_id', auth()->id())
-        ->latest()
-        ->get();
+  
+public function history()
+{
+    $orders = Order::with([
+        'orderItems.product',
+        'address',
+    ])
+    ->where('user_id', auth()->id())
+    ->latest()
+    ->get();
 
-        return response()->json([
-            'message' => 'Order history',
-            'orders' => $orders
-        ]);
-    }
+    return response()->json([
+        'message' => 'Order history',
+        'orders' => $orders,
+    ]);
+}
+
 
     // ✅ DETAIL
     public function show($id)
