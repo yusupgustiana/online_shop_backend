@@ -44,7 +44,10 @@ Route::middleware('auth:sanctum')
     });
 
 
-    Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle']);
+   Route::post(
+    '/midtrans/callback',
+    [OrderControllerApi::class, 'callback']
+);
 
 
 Route::post('/register', [AuthController::class, 'register']);
