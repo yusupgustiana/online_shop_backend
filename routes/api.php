@@ -10,8 +10,41 @@ use App\Http\Controllers\Api\OrderControllerApi;
 use App\Http\Controllers\Api\ShippingControllerApi;
 use App\Http\Controllers\MidtransCallbackController;
 use App\Http\Controllers\Api\BannerControllerApi;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PushNotificationController;
 
-Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle']);
+Route::middleware('auth:sanctum')->post(
+    '/admin/notifications/send',
+    [PushNotificationController::class, 'send']
+);
+Route::middleware('auth:sanctum')
+    ->prefix('notifications')
+    ->name('notifications.')
+    ->group(function () {
+        // GET
+        Route::get('/', [NotificationController::class, 'index'])
+            ->name('index');
+
+        Route::get('/unread', [NotificationController::class, 'unread'])
+            ->name('unread');
+
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount'])
+            ->name('unread-count');
+
+        // PATCH
+        Route::patch('/read-all', [NotificationController::class, 'markAllAsRead'])
+            ->name('read-all');
+
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead'])
+            ->name('read');
+
+        // DELETE
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])
+            ->name('destroy');
+    });
+
+
+    Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle']);
 
 
 Route::post('/register', [AuthController::class, 'register']);

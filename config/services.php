@@ -44,4 +44,12 @@ return [
     'client_key' => env('MIDTRANS_CLIENT_KEY'),
 ],
 
+
+'firebase' => [
+    'credentials' => env('FIREBASE_CREDENTIALS')
+        ? base_path(env('FIREBASE_CREDENTIALS'))
+        : storage_path('app/firebase/google-service.json'),
+],
+
+
 ];
