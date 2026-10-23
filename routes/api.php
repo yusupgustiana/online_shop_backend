@@ -80,9 +80,17 @@ Route::middleware('auth:sanctum')->group(function () {
 //order
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders', [OrderControllerApi::class, 'store']);
+
     Route::get('/orders/history', [OrderControllerApi::class, 'history']);
+
+    // Detail pesanan
     Route::get('/orders/{id}', [OrderControllerApi::class, 'show']);
-    
+
+    // Status pembayaran
+    Route::get('/orders/status/{id}', [
+        OrderControllerApi::class,
+        'checkPaymentStatus',
+    ]);
 });
 
 //Raja ongkir

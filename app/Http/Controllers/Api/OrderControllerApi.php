@@ -266,6 +266,33 @@ public function store(StoreOrderRequest $request)
         ]);
     }
 
+public function checkPaymentStatus(Request $request, int $id)
+{
+    $order = Order::where('id', $id)
+        ->where('user_id', $request->user()->id)
+        ->first();
+
+    if (! $order) {
+        return response()->json([
+            'status' => 'error',
+            'code' => 404,
+            'message' => 'Pesanan tidak ditemukan.',
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'code' => 200,
+        'message' => 'Status pembayaran berhasil diambil.',
+        'data' => [
+            'order_id' => $order->id,
+            'transaction_number' => $order->transaction_number,
+            'payment_method' => $order->payment_method,
+            'payment_status' => $order->status,
+        ],
+    ], 200);
+}
+
     // MIDTRANS CALLBACK
     public function callback(Request $request)
     {
