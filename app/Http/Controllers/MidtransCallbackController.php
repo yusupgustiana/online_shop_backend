@@ -23,7 +23,11 @@ class MidtransCallbackController extends Controller
     }
 
     public function handle(Request $request)
-    {
+    {    Log::warning('MIDTRANS_CALLBACK_CONTROLLER_AKTIF', [
+        'time' => now()->toDateTimeString(),
+        'order_id' => $request->input('order_id'),
+        'transaction_status' => $request->input('transaction_status'),
+    ]);
         // 1. Validasi payload callback.
         $validator = Validator::make($request->all(), [
             'order_id' => ['required', 'string'],
@@ -280,7 +284,11 @@ class MidtransCallbackController extends Controller
                     'order_id' => $orderId,
                     'status' => $result['status'],
                 ]);
-
+Log::info('Memulai proses notifikasi pembayaran', [
+    'order_id' => $orderId,
+    'user_id' => $result['user_id'],
+    'status' => $result['status'],
+]);
                 $user = User::find($result['user_id']);
 
                 if ($user) {
