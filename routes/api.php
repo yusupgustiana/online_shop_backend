@@ -17,6 +17,10 @@ Route::middleware('auth:sanctum')->post(
     '/admin/notifications/send',
     [PushNotificationController::class, 'send']
 );
+Route::post('/midtrans/callback', [
+    MidtransCallbackController::class,
+    'handle',
+])->name('midtrans.callback');
 Route::middleware('auth:sanctum')
     ->prefix('notifications')
     ->name('notifications.')
@@ -44,10 +48,7 @@ Route::middleware('auth:sanctum')
     });
 
 
-   Route::post(
-    '/midtrans/callback',
-    [OrderControllerApi::class, 'callback']
-);
+
 
 
 Route::post('/register', [AuthController::class, 'register']);

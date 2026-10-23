@@ -55,7 +55,8 @@ Route::middleware('guest')->group(function () {
     )->name('register.process');
 
 });
-Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle']);
+
+// Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle']);
 
 
 /*
@@ -294,9 +295,6 @@ Route::delete('/cart/remove/{id}', [CartUserController::class, 'remove'])
 */
 
 
-Route::post('/midtrans/callback',
-    [OrderControllerApi::class,'callback']
-);
 
 
 

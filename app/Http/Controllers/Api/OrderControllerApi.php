@@ -277,7 +277,7 @@ public function store(StoreOrderRequest $request)
             'transaction_status' => ['required', 'string'],
         ]);
 
-        $serverKey = config('midtrans.server_key');
+        $serverKey = config('services.midtrans.server_key');
 
         $hashed = hash(
             'sha512',
