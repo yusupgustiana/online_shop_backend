@@ -18,8 +18,8 @@ use App\Http\Controllers\Api\PaymentDummyController;
 
 Route::post(
     '/apicn/midtrans/callback',
-    [PaymentDummyController::class, 'callback']
-)->name('midtrans.callback');
+    [PaymentDummyController::class, 'callback2']
+)->name('midtransDummy.callback');
 Route::get(
     '/apicn/orders/{idMCustomer}/{orderId}/sync-payment',
     [PaymentDummyController::class, 'syncPayment']

@@ -323,7 +323,7 @@ public function historyDetail(
     ]);
 
     }
-public function callback(Request $request)
+public function callback2(Request $request)
 {
     $payload = $request->all();
 
