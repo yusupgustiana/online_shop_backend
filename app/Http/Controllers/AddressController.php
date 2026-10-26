@@ -118,7 +118,7 @@ Address::create([
 
     public function getOngkir(Request $request, RajaOngkirService $rajaOngkir)
 {
-    $origin = 5779; // 🔥 ganti dengan ID kota toko kamu
+    $origin = 413; // 🔥 ganti dengan ID kota toko kamu
 
     $destination = $request->district_id;
 

@@ -13,6 +13,41 @@ use App\Http\Controllers\Api\BannerControllerApi;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\PushNotificationController;
 
+use App\Http\Controllers\Api\CarDummyController;
+use App\Http\Controllers\Api\PaymentDummyController;
+
+Route::post(
+    '/apicn/midtrans/callback',
+    [PaymentDummyController::class, 'callback']
+)->name('midtrans.callback');
+Route::get(
+    '/apicn/orders/{idMCustomer}/{orderId}/sync-payment',
+    [PaymentDummyController::class, 'syncPayment']
+);
+Route::get(
+    '/apicn/orders/{idMCustomer}',
+    [PaymentDummyController::class, 'history']
+);
+
+Route::get(
+    '/apicn/orders/{idMCustomer}/{orderId}',
+    [PaymentDummyController::class, 'historyDetail']
+);
+Route::post('/apicn/payment', [PaymentDummyController::class, 'store']);
+Route::prefix('cart')->group(function () {
+Route::post('/cart', [CarDummyController::class, 'store']);
+Route::get('/show', [CarDummyController::class, 'index']);
+});
+
+
+
+
+
+
+
+
+
+
 Route::middleware('auth:sanctum')->post(
     '/admin/notifications/send',
     [PushNotificationController::class, 'send']
