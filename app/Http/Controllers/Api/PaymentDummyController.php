@@ -13,6 +13,7 @@ use App\Models\MidtransOrder;
 use Illuminate\Support\Facades\DB;
 use App\Services\MidtransServiceDummy;
 
+
 class PaymentDummyController extends Controller
 {
 public function __construct(
@@ -476,17 +477,23 @@ public function callback2(Request $request)
             'message' => 'Callback Midtrans berhasil diproses.',
         ], 200);
 
-    } catch (\Throwable $e) {
-        Log::error('Gagal memproses callback Midtrans', [
-            'order_id' => $payload['order_id'] ?? null,
-            'message' => $e->getMessage(),
-        ]);
+    }  catch (\Throwable $e) {
+    Log::error('Gagal memproses callback Midtrans', [
+        'order_id' => $payload['order_id'] ?? null,
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString(),
+    ]);
 
-        return response()->json([
-            'status' => false,
-            'message' => 'Callback gagal diproses.',
-        ], 500);
-    }
+    return response()->json([
+        'status' => false,
+        'message' => 'Callback gagal diproses.',
+        'debug' => app()->environment('local')
+            ? $e->getMessage()
+            : null,
+    ], 500);
+}
 }
 
 }   
