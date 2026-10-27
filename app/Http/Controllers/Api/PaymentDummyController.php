@@ -324,11 +324,19 @@ public function historyDetail(
     ]);
 
     }
+
+
+
+
 public function callback2(Request $request)
 {
     $payload = $request->all();
 
-    // Pastikan field wajib tersedia.
+    /*
+    |--------------------------------------------------------------------------
+    | 1. Validasi field wajib
+    |--------------------------------------------------------------------------
+    */
     $required = [
         'order_id',
         'status_code',
@@ -338,7 +346,11 @@ public function callback2(Request $request)
     ];
 
     foreach ($required as $field) {
-        if (!isset($payload[$field]) || $payload[$field] === '') {
+        if (
+            !array_key_exists($field, $payload) ||
+            !is_scalar($payload[$field]) ||
+            trim((string) $payload[$field]) === ''
+        ) {
             return response()->json([
                 'status' => false,
                 'message' => "Field {$field} wajib tersedia.",
@@ -346,25 +358,44 @@ public function callback2(Request $request)
         }
     }
 
-    // Verifikasi signature dari Midtrans.
+    /*
+    |--------------------------------------------------------------------------
+    | 2. Ambil Server Key
+    |--------------------------------------------------------------------------
+    */
     $serverKey = config('services.midtrans.server_key');
+
+    if (empty($serverKey)) {
+        Log::error('Server Key Midtrans belum dikonfigurasi.');
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Konfigurasi pembayaran belum tersedia.',
+        ], 500);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. Verifikasi signature Midtrans
+    |--------------------------------------------------------------------------
+    | Rumus:
+    | SHA512(order_id + status_code + gross_amount + Server Key)
+    */
+    $orderId = (string) $payload['order_id'];
+    $statusCode = (string) $payload['status_code'];
+    $grossAmount = (string) $payload['gross_amount'];
+    $receivedSignature = (string) $payload['signature_key'];
 
     $expectedSignature = hash(
         'sha512',
-        $payload['order_id']
-        . $payload['status_code']
-        . $payload['gross_amount']
-        . $serverKey
+        $orderId . $statusCode . $grossAmount . $serverKey
     );
 
-    if (
-        !hash_equals(
-            $expectedSignature,
-            (string) $payload['signature_key']
-        )
-    ) {
-        Log::warning('Callback Midtrans dengan signature tidak valid', [
-            'order_id' => $payload['order_id'],
+    if (!hash_equals($expectedSignature, $receivedSignature)) {
+        Log::warning('Signature callback Midtrans tidak valid.', [
+            'order_id' => $orderId,
+            'status_code' => $statusCode,
+            'gross_amount' => $grossAmount,
         ]);
 
         return response()->json([
@@ -373,29 +404,59 @@ public function callback2(Request $request)
         ], 403);
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | 4. Validasi format nominal
+    |--------------------------------------------------------------------------
+    */
+    if (
+        !is_numeric($grossAmount) ||
+        (float) $grossAmount < 0
+    ) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Nominal transaksi tidak valid.',
+        ], 400);
+    }
+
     try {
-        DB::transaction(function () use ($payload) {
-            $order = MidtransOrder::where(
-                'order_id',
-                $payload['order_id']
-            )->lockForUpdate()->first();
+        $result = DB::transaction(function () use ($payload, $orderId, $grossAmount) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | 5. Cari dan kunci transaksi
+            |--------------------------------------------------------------------------
+            */
+            $order = MidtransOrder::where('order_id', $orderId)
+                ->lockForUpdate()
+                ->first();
 
             if (!$order) {
                 throw new \RuntimeException(
-                    'Transaksi tidak ditemukan: ' . $payload['order_id']
+                    'Transaksi tidak ditemukan: ' . $orderId
                 );
             }
 
-            // Pastikan nominal notifikasi sama dengan total pesanan.
+            /*
+            |--------------------------------------------------------------------------
+            | 6. Cocokkan nominal dengan database
+            |--------------------------------------------------------------------------
+            | Perbandingan menggunakan dua angka desimal.
+            */
             if (
-                number_format((float) $order->total, 2, '.', '')
-                !== number_format((float) $payload['gross_amount'], 2, '.', '')
+                number_format((float) $order->total, 2, '.', '') !==
+                number_format((float) $grossAmount, 2, '.', '')
             ) {
                 throw new \RuntimeException(
-                    'Nominal transaksi tidak sesuai.'
+                    'Nominal transaksi tidak sesuai dengan database.'
                 );
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | 7. Petakan status transaksi
+            |--------------------------------------------------------------------------
+            */
             $transactionStatus = strtolower(
                 (string) $payload['transaction_status']
             );
@@ -407,57 +468,76 @@ public function callback2(Request $request)
             switch ($transactionStatus) {
                 case 'settlement':
                     $paymentStatus = 'paid';
-                    $status = 'paid';
+                    $orderStatus = 'paid';
                     break;
 
                 case 'capture':
                     if ($fraudStatus === 'accept') {
                         $paymentStatus = 'paid';
-                        $status = 'paid';
+                        $orderStatus = 'paid';
                     } elseif ($fraudStatus === 'challenge') {
                         $paymentStatus = 'pending';
-                        $status = 'pending';
+                        $orderStatus = 'pending';
                     } else {
                         $paymentStatus = 'failed';
-                        $status = 'failed';
+                        $orderStatus = 'failed';
                     }
                     break;
 
                 case 'pending':
                     $paymentStatus = 'pending';
-                    $status = 'pending';
+                    $orderStatus = 'pending';
                     break;
 
                 case 'expire':
                     $paymentStatus = 'expired';
-                    $status = 'expired';
+                    $orderStatus = 'expired';
                     break;
 
                 case 'cancel':
                 case 'deny':
                 case 'failure':
                     $paymentStatus = 'failed';
-                    $status = 'failed';
+                    $orderStatus = 'failed';
                     break;
 
                 default:
-                    // Status lain tidak mengubah status pesanan.
-                    Log::info('Status callback Midtrans belum dipetakan', [
-                        'order_id' => $payload['order_id'],
-                        'transaction_status' => $transactionStatus,
-                    ]);
+                    Log::info(
+                        'Status transaksi Midtrans belum dipetakan.',
+                        [
+                            'order_id' => $orderId,
+                            'transaction_status' => $transactionStatus,
+                        ]
+                    );
 
-                    return;
+                    return 'ignored';
             }
 
-            // Jangan menurunkan status pesanan yang sudah dibayar.
-            if ($order->payment_status === 'paid'
-                && $paymentStatus !== 'paid') {
-                return;
+            /*
+            |--------------------------------------------------------------------------
+            | 8. Lindungi transaksi yang sudah dibayar
+            |--------------------------------------------------------------------------
+            | Callback lama tidak boleh menurunkan status paid.
+            */
+            if (
+                strtolower((string) $order->payment_status) === 'paid' &&
+                $paymentStatus !== 'paid'
+            ) {
+                Log::info(
+                    'Callback diabaikan karena transaksi sudah dibayar.',
+                    ['order_id' => $orderId]
+                );
+
+                return 'already_paid';
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | 9. Perbarui status transaksi
+            |--------------------------------------------------------------------------
+            */
             $order->payment_status = $paymentStatus;
-            $order->status = $status;
+            $order->status = $orderStatus;
 
             if (!empty($payload['transaction_id'])) {
                 $order->payment_transaction_id =
@@ -470,30 +550,49 @@ public function callback2(Request $request)
             }
 
             $order->save();
+
+            return 'updated';
         });
 
+        /*
+        |--------------------------------------------------------------------------
+        | 10. Respons sukses
+        |--------------------------------------------------------------------------
+        */
         return response()->json([
             'status' => true,
-            'message' => 'Callback Midtrans berhasil diproses.',
+            'message' => match ($result) {
+                'updated' => 'Callback Midtrans berhasil diproses.',
+                'already_paid' => 'Transaksi sudah dibayar. Status dipertahankan.',
+                'ignored' => 'Status transaksi tidak mengubah data pesanan.',
+                default => 'Callback berhasil diproses.',
+            },
         ], 200);
 
-    }  catch (\Throwable $e) {
-    Log::error('Gagal memproses callback Midtrans', [
-        'order_id' => $payload['order_id'] ?? null,
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => $e->getTraceAsString(),
-    ]);
+    } catch (\Throwable $e) {
 
-    return response()->json([
-        'status' => false,
-        'message' => 'Callback gagal diproses.',
-        'debug' => app()->environment('local')
-            ? $e->getMessage()
-            : null,
-    ], 500);
+        /*
+        |--------------------------------------------------------------------------
+        | 11. Catat error tanpa membocorkan detail ke publik
+        |--------------------------------------------------------------------------
+        */
+        Log::error('Gagal memproses callback Midtrans.', [
+            'order_id' => $orderId,
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Callback gagal diproses.',
+            'debug' => app()->environment('local')
+                ? $e->getMessage()
+                : null,
+        ], 500);
+    }
 }
-}
+
 
 }   
