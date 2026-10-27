@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -7,8 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
+   public function up(): void
+{
+    if (!Schema::hasTable('fcm_tokens')) {
         Schema::create('fcm_tokens', function (Blueprint $table) {
             $table->id();
             $table->string('id_m_customer', 100)->index();
@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
+}
 
     public function down(): void
     {
