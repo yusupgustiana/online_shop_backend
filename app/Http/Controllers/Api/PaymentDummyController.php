@@ -12,6 +12,8 @@ use Throwable;
 use App\Models\MidtransOrder;
 use Illuminate\Support\Facades\DB;
 use App\Services\MidtransServiceDummy;
+use App\Models\FcmToken;
+use App\Services\FcmService;
 
 
 class PaymentDummyController extends Controller
@@ -166,6 +168,36 @@ $orderNumber = 'CN-' . $orderDate . '-' .
 // Simpan nomor pesanan.
 $order->order_number = $orderNumber;
 $order->save();
+// Kirim notifikasi bahwa pesanan berhasil dibuat.
+try {
+    $fcmTokens = FcmToken::where(
+        'id_m_customer',
+        $order->id_m_customer
+    )->pluck('fcm_token');
+
+    $fcmService = app(FcmService::class);
+
+    foreach ($fcmTokens as $fcmToken) {
+        $fcmService->sendToToken(
+            project: 'carinemu',
+            token: $fcmToken,
+            title: 'Pesanan Berhasil Dibuat',
+            body: 'Pesanan ' . $order->order_number .
+                ' berhasil dibuat. Silakan selesaikan pembayaran.',
+            data: [
+                'order_id' => (string) $order->order_id,
+                'order_number' => (string) $order->order_number,
+                'type' => 'order_created',
+            ],
+        );
+    }
+} catch (\Throwable $e) {
+    // Kegagalan FCM tidak boleh membatalkan checkout.
+    Log::error('Gagal mengirim notifikasi FCM checkout', [
+        'order_id' => $order->order_id,
+        'message' => $e->getMessage(),
+    ]);
+}
 
         return response()->json([
             'code' => 201,

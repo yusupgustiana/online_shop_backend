@@ -15,7 +15,12 @@ use App\Http\Controllers\Api\PushNotificationController;
 
 use App\Http\Controllers\Api\CarDummyController;
 use App\Http\Controllers\Api\PaymentDummyController;
+use App\Http\Controllers\FcmController;
 
+Route::post(
+    '/apicn/fcm/register-token',
+    [FcmController::class, 'registerToken']
+);
 Route::post(
     '/apicn/midtrans/callback',
     [PaymentDummyController::class, 'callback2']

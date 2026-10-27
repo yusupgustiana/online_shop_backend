@@ -52,4 +52,12 @@ return [
 ],
 
 
+'firebase_carinemu' => [
+    'credentials' => env(
+        'FIREBASE_CARINEMU_CREDENTIALS',
+        storage_path('app/firebase/carinemu-service-account.json')
+    ),
+],
+
+
 ];
