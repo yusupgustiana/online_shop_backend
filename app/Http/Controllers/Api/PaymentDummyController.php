@@ -13,7 +13,7 @@ use App\Models\MidtransOrder;
 use Illuminate\Support\Facades\DB;
 use App\Services\MidtransServiceDummy;
 use App\Models\FcmToken;
-use App\Services\FcmService;
+use App\Services\FcmServiceCarinemuCarinemu;
 
 
 class PaymentDummyController extends Controller
@@ -175,10 +175,10 @@ try {
         $order->id_m_customer
     )->pluck('fcm_token');
 
-    $fcmService = app(FcmService::class);
+    $FcmServiceCarinemu = app(FcmServiceCarinemu::class);
 
     foreach ($fcmTokens as $fcmToken) {
-        $fcmService->sendToToken(
+        $FcmServiceCarinemu->sendToToken(
             project: 'carinemu',
             token: $fcmToken,
             title: 'Pesanan Berhasil Dibuat',
