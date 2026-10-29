@@ -95,7 +95,7 @@ class MidtransCallbackController extends Controller
                 $transactionStatus,
                 $fraudStatus
             ) {
-                $order = Order::where(
+                $order = MidtransOrder::where(
                     'order_id',
                     $orderId
                 )->lockForUpdate()->first();

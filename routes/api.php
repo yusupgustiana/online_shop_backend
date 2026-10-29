@@ -16,10 +16,17 @@ use App\Http\Controllers\Api\PushNotificationController;
 use App\Http\Controllers\Api\CarDummyController;
 use App\Http\Controllers\Api\PaymentDummyController;
 use App\Http\Controllers\FcmController;
+use App\Http\Controllers\FcmTestController;
+
+Route::post('/test-fcm', [FcmTestController::class, 'send']);
 
 Route::post(
     '/apicn/fcm/register-token',
     [FcmController::class, 'registerToken']
+);
+Route::patch(
+    '/orders/{idMCustomer}/{orderId}/received',
+    [PaymentDummyController::class, 'confirmReceived']
 );
 Route::post(
     '/apicn/midtrans/callback',
