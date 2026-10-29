@@ -5,16 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Midtrans\Config;
-use Midtrans\Snap;
 use Illuminate\Support\Str;
 use Throwable;
 use App\Models\MidtransOrder;
 use Illuminate\Support\Facades\DB;
 use App\Services\MidtransServiceDummy;
 use App\Models\FcmToken;
-use App\Services\FcmServiceCarinemuCarinemu;
-
+use App\Services\FcmServiceCarinemu;
 
 class PaymentDummyController extends Controller
 {
@@ -75,7 +72,7 @@ public function store(Request $request)
 
         // Buat ID transaksi dari aplikasi.
         $orderId = 'ORD-' . strtoupper(
-            (string) \Illuminate\Support\Str::uuid()
+            (string) Str::uuid()
         );
 
         // Buat transaksi melalui MidtransService (Core API).
@@ -104,21 +101,42 @@ public function store(Request $request)
 
         $transactionStatus = $paymentData['transaction_status'];
 
-        $paymentStatus = in_array(
-            $transactionStatus,
-            ['pending', 'settlement', 'capture', 'deny', 'cancel', 'expire'],
-            true
-        ) ? $transactionStatus : 'pending';
+switch ($transactionStatus) {
+    case 'settlement':
+        $paymentStatus = 'paid';
+        $orderStatus = 'paid';
+        break;
 
-        $orderStatus = in_array(
-            $transactionStatus,
-            ['settlement', 'capture'],
-            true
-        ) ? 'paid' : (
-            in_array($transactionStatus, ['expire', 'cancel', 'deny'], true)
-                ? $transactionStatus
-                : 'pending'
-        );
+    case 'capture':
+        $paymentStatus = strtolower(
+            (string) ($paymentData['fraud_status'] ?? '')
+        ) === 'accept' ? 'paid' : 'pending';
+
+        $orderStatus = $paymentStatus;
+        break;
+
+    case 'expire':
+        $paymentStatus = 'expired';
+        $orderStatus = 'expired';
+        break;
+
+    case 'cancel':
+        $paymentStatus = 'cancelled';
+        $orderStatus = 'cancelled';
+        break;
+
+    case 'deny':
+    case 'failure':
+        $paymentStatus = 'failed';
+        $orderStatus = 'failed';
+        break;
+
+    case 'pending':
+    default:
+        $paymentStatus = 'pending';
+        $orderStatus = 'pending';
+        break;
+}
 
         // Simpan order beserta detail pembayaran dari Midtrans.
         $order = MidtransOrder::create([
@@ -449,10 +467,12 @@ public function confirmReceived(
 
 
 
+
 public function callback2(Request $request)
 {
     $payload = $request->all();
 
+    // 1. Validasi field wajib dari Midtrans.
     $required = [
         'order_id',
         'status_code',
@@ -475,6 +495,7 @@ public function callback2(Request $request)
         }
     }
 
+    // 2. Validasi signature Midtrans.
     $serverKey = config('services.midtrans.server_key');
 
     if (empty($serverKey)) {
@@ -492,7 +513,6 @@ public function callback2(Request $request)
     $grossAmount = (string) $payload['gross_amount'];
     $receivedSignature = (string) $payload['signature_key'];
 
-    // Validasi signature resmi Midtrans.
     $expectedSignature = hash(
         'sha512',
         $orderId . $statusCode . $grossAmount . $serverKey
@@ -519,6 +539,7 @@ public function callback2(Request $request)
     }
 
     try {
+        // 3. Update status secara atomik di database.
         $result = DB::transaction(function () use (
             $payload,
             $orderId,
@@ -534,7 +555,7 @@ public function callback2(Request $request)
                 );
             }
 
-            // Cocokkan nominal callback dengan nominal pesanan.
+            // Cocokkan nominal callback dengan total order.
             if (
                 number_format((float) $order->total, 2, '.', '') !==
                 number_format((float) $grossAmount, 2, '.', '')
@@ -552,36 +573,55 @@ public function callback2(Request $request)
                 (string) ($payload['fraud_status'] ?? '')
             );
 
+            /*
+             * Normalisasi status Midtrans menjadi status aplikasi.
+             */
             switch ($transactionStatus) {
                 case 'settlement':
                     $paymentStatus = 'paid';
+                    $orderStatus = 'paid';
                     break;
 
                 case 'capture':
                     if ($fraudStatus === 'accept') {
                         $paymentStatus = 'paid';
+                        $orderStatus = 'paid';
                     } elseif ($fraudStatus === 'challenge') {
                         $paymentStatus = 'pending';
+                        $orderStatus = 'pending';
                     } else {
                         $paymentStatus = 'failed';
+                        $orderStatus = 'failed';
                     }
                     break;
 
                 case 'pending':
                     $paymentStatus = 'pending';
+                    $orderStatus = 'pending';
                     break;
 
                 case 'expire':
                     $paymentStatus = 'expired';
+                    $orderStatus = 'expired';
                     break;
 
                 case 'cancel':
+                    $paymentStatus = 'cancelled';
+                    $orderStatus = 'cancelled';
+                    break;
+
                 case 'deny':
                 case 'failure':
                     $paymentStatus = 'failed';
+                    $orderStatus = 'failed';
                     break;
 
                 default:
+                    Log::info('Status callback Midtrans tidak diproses.', [
+                        'order_id' => $orderId,
+                        'transaction_status' => $transactionStatus,
+                    ]);
+
                     return [
                         'result' => 'ignored',
                         'order' => null,
@@ -593,10 +633,20 @@ public function callback2(Request $request)
                 (string) $order->payment_status
             );
 
-            // Callback berulang tidak boleh menurunkan status paid.
+            $oldOrderStatus = strtolower(
+                (string) $order->status
+            );
+
+            $isPaymentSuccessful = $paymentStatus === 'paid';
+
+            /*
+             * Status paid tidak boleh diturunkan oleh callback terlambat.
+             * Namun, jika callback sukses datang, status pembayaran tetap
+             * disinkronkan menjadi paid.
+             */
             if (
                 $oldPaymentStatus === 'paid' &&
-                $paymentStatus !== 'paid'
+                !$isPaymentSuccessful
             ) {
                 return [
                     'result' => 'already_paid',
@@ -605,33 +655,41 @@ public function callback2(Request $request)
                 ];
             }
 
-            // Jangan menimpa status pengiriman/penerimaan
-            // ketika callback pembayaran datang terlambat.
-            $oldOrderStatus = strtolower((string) $order->status);
+            /*
+             * Status yang menandakan pesanan sudah diproses tidak boleh
+             * ditimpa oleh callback pembayaran yang terlambat.
+             */
+            $protectedOrderStatuses = [
+                'processing',
+                'packed',
+                'shipped',
+                'delivered',
+                'completed',
+                'received',
+            ];
 
-            if ($paymentStatus === 'paid') {
-                if (in_array($oldOrderStatus, [
-                    'pending',
-                    'paid',
-                    'failed',
-                    'expired',
-                    'cancelled',
-                    'canceled',
-                ], true)) {
+            if ($isPaymentSuccessful) {
+                if (!in_array(
+                    $oldOrderStatus,
+                    $protectedOrderStatuses,
+                    true
+                )) {
                     $order->status = 'paid';
                 }
+
+                // Selalu sinkronkan status pembayaran.
+                $order->payment_status = 'paid';
             } else {
-                // Status gagal hanya memperbarui status pesanan
-                // jika pesanan belum dibayar dan belum diproses.
+                // Status non-paid hanya boleh mengubah order yang pending.
                 if (
                     $oldPaymentStatus !== 'paid' &&
-                    in_array($oldOrderStatus, ['pending'], true)
+                    $oldOrderStatus === 'pending'
                 ) {
-                    $order->status = $paymentStatus;
+                    $order->status = $orderStatus;
                 }
-            }
 
-            $order->payment_status = $paymentStatus;
+                $order->payment_status = $paymentStatus;
+            }
 
             if (!empty($payload['transaction_id'])) {
                 $order->payment_transaction_id =
@@ -648,20 +706,22 @@ public function callback2(Request $request)
             return [
                 'result' => 'updated',
                 'order' => [
-                    'order_id' => $order->order_id,
-                    'order_number' => $order->order_number,
+                    'order_id' => (string) $order->order_id,
+                    'order_number' => (string) (
+                        $order->order_number ?? $order->order_id
+                    ),
                     'id_m_customer' => $order->id_m_customer,
                 ],
+                // Hanya kirim FCM saat transisi pertama menjadi paid.
                 'notify_payment' =>
                     $oldPaymentStatus !== 'paid' &&
-                    $paymentStatus === 'paid',
+                    $isPaymentSuccessful,
             ];
         });
 
         /*
-         * Kirim FCM setelah transaksi database berhasil commit.
-         * Callback berulang tidak mengirim notifikasi pembayaran
-         * berhasil lagi.
+         * 4. Kirim FCM setelah transaksi database berhasil.
+         * Gangguan FCM tidak membatalkan pembaruan pembayaran.
          */
         if (
             $result['result'] === 'updated' &&
@@ -674,7 +734,11 @@ public function callback2(Request $request)
                 $fcmTokens = FcmToken::where(
                     'id_m_customer',
                     $orderData['id_m_customer']
-                )->pluck('fcm_token');
+                )
+                    ->whereNotNull('fcm_token')
+                    ->where('fcm_token', '!=', '')
+                    ->pluck('fcm_token')
+                    ->unique();
 
                 $fcmService = app(FcmServiceCarinemu::class);
 
@@ -687,16 +751,13 @@ public function callback2(Request $request)
                             $orderData['order_number'] .
                             ' berhasil dikonfirmasi.',
                         data: [
-                            'order_id' => (string) $orderData['order_id'],
-                            'order_number' =>
-                                (string) $orderData['order_number'],
+                            'order_id' => $orderData['order_id'],
+                            'order_number' => $orderData['order_number'],
                             'type' => 'payment_success',
                         ],
                     );
                 }
             } catch (\Throwable $e) {
-                // Jangan meminta Midtrans mengulang callback hanya
-                // karena layanan notifikasi mengalami gangguan.
                 Log::error('FCM pembayaran gagal dikirim.', [
                     'order_id' => $orderId,
                     'message' => $e->getMessage(),
